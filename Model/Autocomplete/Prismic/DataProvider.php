@@ -7,13 +7,13 @@ namespace Elgentos\ElasticsuitePrismicSearch\Model\Autocomplete\Prismic;
 use Elgentos\ElasticsuitePrismicSearch\Block\Prismic\Suggest;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\Collection;
 use Magento\Search\Model\Autocomplete\DataProviderInterface;
-use Magento\Search\Model\Autocomplete\Item;
 use Magento\Search\Model\QueryFactory;
 use Magento\Search\Model\Autocomplete\ItemFactory;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Elgentos\ElasticsuitePrismicSearch\Helper\Configuration as ConfigurationHelper;
-use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\CollectionFactory as PrismicCollectionFactory;
+use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\CollectionFactory
+    as PrismicCollectionFactory;
 use Smile\ElasticsuiteCore\Model\Autocomplete\Terms\DataProvider as TermDataProvider;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 

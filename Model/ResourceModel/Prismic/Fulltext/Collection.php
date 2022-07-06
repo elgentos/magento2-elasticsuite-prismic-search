@@ -46,11 +46,10 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
         MetadataPool           $metadataPool,
         Builder                $requestBuilder,
         SearchEngine           $searchEngine,
-                               $searchRequestName = 'prismic_search_container',
+        string                 $searchRequestName = 'prismic_search_container',
         AdapterInterface       $connection = null,
         AbstractDb             $resource = null
-    )
-    {
+    ) {
         parent::__construct(
             $entityFactory,
             $logger,

@@ -37,7 +37,7 @@ class ContentTypeColumn extends Select
         return parent::_toHtml();
     }
 
-    protected function _toOptionArray(
+    protected function toOptionArray(
         Collection $collection,
         string $valueField = 'id',
         string $labelField = 'name',
@@ -59,7 +59,10 @@ class ContentTypeColumn extends Select
 
     private function getSourceOptions(): array
     {
-        return $this->_toOptionArray($this->routeCollection, 'content_type',
-            'title');
+        return $this->toOptionArray(
+            $this->routeCollection,
+            'content_type',
+            'title'
+        );
     }
 }

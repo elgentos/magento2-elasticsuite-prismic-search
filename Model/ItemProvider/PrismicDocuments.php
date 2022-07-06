@@ -232,17 +232,17 @@ class PrismicDocuments
 
             // Remove blocks from layout
             $layout          = $page->getLayout();
-            array_map(function ($blockName) use ($layout) {
+            array_map(static function ($blockName) use ($layout) {
                     $layout->unsetElement($blockName);
-                }, array_filter(
-                    array_map('trim',
-                        explode(
-                            PHP_EOL,
-                            $this->extensionConfiguration->getConfigValue('block_blacklist')
-                        )
+            }, array_filter(
+                array_map(
+                    'trim',
+                    explode(
+                        PHP_EOL,
+                        $this->extensionConfiguration->getConfigValue('block_blacklist')
                     )
                 )
-            );
+            ));
 
             // Generate response HTML
             /** @var Http $response */
