@@ -13,6 +13,7 @@
                 <label>Prismic settings</label>
                 <field id="content_types" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" translate="label" type="select">
                     <label>Include Content types in ElasticSuite search</label>
+                    <comment>Only Content types that have a route defined under Content > Routes will show up here.</comment>
                     <frontend_model>Elgentos\ElasticsuitePrismicSearch\Block\Adminhtml\Form\Field\ContentTypes</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                     <can_be_empty>1</can_be_empty>
