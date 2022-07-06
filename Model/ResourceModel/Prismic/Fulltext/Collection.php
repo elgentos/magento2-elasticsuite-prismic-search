@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext;
 
-use LogicException;
 use Magento\Framework\Api\Search\Document;
 use Magento\Framework\Data\Collection\Db\FetchStrategyInterface;
 use Magento\Framework\Data\Collection\EntityFactoryInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\DB\Adapter\AdapterInterface;
-use Magento\Framework\DB\Select;
 use Magento\Framework\EntityManager\MetadataPool;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Search\Model\SearchEngine;
-use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 use Smile\ElasticsuiteCore\Search\Adapter\Elasticsuite\Response\QueryResponse;
@@ -38,7 +35,7 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
 
     private array $facets = [];
 
-    private int $storeId = 1;
+    private int $storeId;
 
     public function __construct(
         EntityFactoryInterface $entityFactory,
@@ -71,11 +68,59 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
     }
 
     /**
+    * Add filter by store
+    *
+    * @param int|array|\Magento\Store\Model\Store $storeId Store id
+    *
+    * @return $this
+    */
+    public function setStoreId($storeId)
+    {
+        $this->storeId = $storeId;
+
+        return $this;
+    }
+
+    /**
+     * Returns current store id.
+     *
+     * @return int
+     */
+    public function getStoreId()
+    {
+        return $this->storeId;
+    }
+
+    /**
+     * Add filter by store
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag) Method is inherited
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter) Method is inherited
+     *
+     * @param int|array|\Magento\Store\Model\Store $store     Store
+     * @param bool                                 $withAdmin With admin
+     *
+     * @return $this
+     */
+    public function addStoreFilter($store, $withAdmin = true)
+    {
+        if (is_object($store)) {
+            $store = $store->getId();
+        }
+
+        if (is_array($store)) {
+            throw new \LogicException("Filtering on multiple stores is not allowed in search engine collections.");
+        }
+
+        return $this->setStoreId($store);
+    }
+
+    /**
      * Add search query filter
      *
      * @param string $query Search query text.
      *
-     * @return \Smile\ElasticsuiteCatalog\Model\ResourceModel\Product\Fulltext\Collection
+     * @return $this
      */
     public function addSearchFilter($query)
     {
@@ -122,7 +167,7 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
         foreach ($this->queryResponse->getIterator() as $document) {
             $documentId = $document->getId();
             $document = new DataObject($document->getSource());
-            $document->setStoreId(1);
+            $document->setStoreId($this->storeId);
             $this->_items[$documentId] = $document;
         }
 

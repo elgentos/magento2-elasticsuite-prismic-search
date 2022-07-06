@@ -78,7 +78,7 @@ class Result extends Template
 
     public function getResultCount(): int
     {
-        return $this->getPrismicCollection()->getSize();
+        return (int) $this->getPrismicCollection()->getSize();
     }
 
     public function getQuery(): Query
@@ -113,6 +113,7 @@ class Result extends Template
         $prismicCollection = $collectionFactory->create();
 
         $queryText = $this->getQueryText();
+        $prismicCollection->addStoreFilter((int)$this->_storeManager->getStore()->getId());
         $prismicCollection->addSearchFilter($queryText);
 
         return $prismicCollection;

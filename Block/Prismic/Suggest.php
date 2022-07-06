@@ -101,7 +101,7 @@ class Suggest extends Template
         $prismicCollection = $collectionFactory->create();
 
         $prismicCollection->setPageSize($this->getNumberOfResults());
-
+        $prismicCollection->addStoreFilter((int)$this->_storeManager->getStore()->getId());
         $prismicCollection->addSearchFilter($this->getQueryText());
 
         return $prismicCollection;
