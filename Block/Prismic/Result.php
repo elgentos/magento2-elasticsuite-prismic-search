@@ -66,6 +66,16 @@ class Result extends Template
         return $this->prismicCollection;
     }
 
+    public function getPrismicCollectionPerType(): array
+    {
+        $results = [];
+        foreach ($this->prismicCollection as $document) {
+            $results[$document->getType()][] = $document;
+        }
+
+        return $results;
+    }
+
     public function getResultCount(): int
     {
         return $this->getPrismicCollection()->getSize();

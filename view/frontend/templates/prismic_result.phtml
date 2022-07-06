@@ -1,9 +1,19 @@
-<div class="search results">
-    <h2><?php echo __('Results in cms pages.')?></h2>
+<?php
 
-    <ul>
-        <?php foreach ($block->getPageCollection() as $currentPage) : ?>
-            <li><a href="<?php echo $block->getPageUrl($currentPage->getId())?>"><?php echo $currentPage->getTitle(); ?></a></li>
-        <?php endforeach; ?>
-    </ul>
+use Elgentos\ElasticsuitePrismicSearch\Block\Prismic\Result;
+
+/** @var $block Result */
+?>
+
+<div class="search results">
+    <?php foreach ($block->getPrismicCollectionPerType() as $type => $prismicDocuments): ?>
+        <h2><?php echo __(ucwords($type)); ?> <?php echo __('Results') ?></h2>
+        <ul>
+            <?php foreach ($prismicDocuments as $prismicDocument) : ?>
+                <li>
+                    <a href="<?php echo $block->getPageUrl($prismicDocument->getUrl()) ?>"><?php echo $prismicDocument->getTitle(); ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endforeach; ?>
 </div>
