@@ -22,7 +22,7 @@ class Full
         $this->areaList       = $areaList;
     }
 
-    public function rebuildStoreIndex(int $storeId, $ids = []): \Traversable
+    public function rebuildStoreIndex(int $storeId, array $ids = []): \Traversable
     {
         $this->areaList->getArea(Area::AREA_FRONTEND)->load(Area::PART_DESIGN);
 
@@ -32,7 +32,7 @@ class Full
         }
     }
 
-    private function getSearchablePrismicDocument(int $storeId, $ids = []): array
+    private function getSearchablePrismicDocument(int $storeId, array $ids = []): array
     {
         return $this->resourceModel->getSearchablePrismicDocument($storeId, $ids);
     }

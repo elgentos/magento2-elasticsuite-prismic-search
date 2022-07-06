@@ -22,7 +22,7 @@ class Full extends AbstractIndexer
         parent::__construct($resource, $storeManager);
     }
 
-    public function getSearchablePrismicDocument($storeId, $ids = []): array
+    public function getSearchablePrismicDocument(int $storeId, array $ids = []): array
     {
         return $this->prismicDocuments->getItems($storeId, $ids);
     }

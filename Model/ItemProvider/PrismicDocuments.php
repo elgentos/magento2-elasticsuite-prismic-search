@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Elgentos\ElasticsuitePrismicSearch\Model\ItemProvider;
 
-use Elgentos\ElasticsuitePrismicSearch\Block\Prismic\Document;
 use Elgentos\ElasticsuitePrismicSearch\Helper\Configuration;
 use Elgentos\PrismicIO\Api\ConfigurationInterface;
 use Elgentos\PrismicIO\Exception\ApiNotEnabledException;
 use Elgentos\PrismicIO\Model\Api;
-use Elgentos\PrismicIO\Renderer\Page;
 use Elgentos\PrismicIO\Renderer\PageFactory;
 use Elgentos\PrismicIO\ViewModel\LinkResolver;
 use Exception;
@@ -71,12 +69,14 @@ class PrismicDocuments
     }
 
     /**
-     * @param $storeId
+     * @param int   $storeId
+     * @param array $ids
+     *
      * @return array
      * @throws ApiNotEnabledException
      * @throws NoSuchEntityException
      */
-    public function getItems($storeId, $ids): array
+    public function getItems(int $storeId, array $ids = []): array
     {
         $this->documents = [];
         $foundDocuments = [];
@@ -90,8 +90,14 @@ class PrismicDocuments
             $page = 0;
 
             do {
+                $predicates = [
+                    Predicates::at('document.type', $prismicContentType)
+                ];
+                if (!empty($ids)) {
+                    $predicates[] = Predicates::in('document.id', $ids);
+                }
                 $localeDocuments = $api->query(
-                    [Predicates::at('document.type', $prismicContentType)],
+                    $predicates,
                     [
                         'lang' => $this->configuration->getContentLanguage($store),
                         'pageSize' => 20,
