@@ -1,0 +1,19 @@
+{
+    "name": "elgentos/magento2-elasticsuite-prismic-search",
+    "version": "1.0.0",
+    "description": "Adds search functionality to Elasticsuite for Prismic custom types",
+    "type": "magento2-module",
+    "require": {
+        "magento/framework": "*",
+        "smile/elasticsuite": "*",
+        "elgentos/module-prismicio": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Elgentos\\ElasticsuitePrismicSearch\\": ""
+        }
+    }
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="top.search">
+            <arguments>
+                <argument name="rendererList" xsi:type="array">
+                    <item name="prismic" xsi:type="array">
+                        <item name="title" xsi:type="string" translate="true">Prismic</item>
+                        <item name="template" xsi:type="string">Elgentos_ElasticsuitePrismicSearch/prismic/prismic</item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

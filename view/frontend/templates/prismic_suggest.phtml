@@ -1,0 +1,21 @@
+<?php
+
+use Elgentos\ElasticsuitePrismicSearch\Block\Prismic\Suggest;
+
+/** @var $block Suggest */
+
+if ($block->canShowBlock()): ?>
+    <div class="search results">
+        <?php foreach ($block->getPrismicCollectionPerType() as $type => $prismicDocuments): ?>
+            <h2><?php echo __(ucwords($type)); ?> <?php echo __('Results') ?></h2>
+            <ul>
+                <?php foreach ($prismicDocuments as $prismicDocument) : ?>
+                    <li>
+                        <a href="<?php echo $block->getPageUrl($prismicDocument->getUrl()) ?>"><?php echo $prismicDocument->getTitle(); ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <p><a href="<?php echo $block->getShowAllUrl() ?>"><?php echo __('Show more.') ?></a></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

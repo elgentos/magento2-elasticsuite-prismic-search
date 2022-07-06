@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Mview/etc/mview.xsd">
+
+    <view id="elasticsuite_prismic_fulltext" class="Elgentos\ElasticsuitePrismicSearch\Model\Prismic\Indexer\Fulltext" group="indexer">
+        <subscriptions>
+            <table name="prismic" entity_column="prismic_id" />
+        </subscriptions>
+    </view>
+
+</config>

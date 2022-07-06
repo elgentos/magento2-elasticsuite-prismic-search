@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<requests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="urn:magento:module:Smile_ElasticsuiteCore:etc/elasticsuite_search_request.xsd">
+        <request name="prismic_search_container" label="Prismic Search" index="prismic" type="prismic" fulltext="true" />
+</requests>

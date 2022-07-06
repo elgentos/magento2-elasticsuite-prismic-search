@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="elgentos_elasticsuite_prismic" frontName="elasticsuite_prismic">
+            <module name="Elgentos_ElasticsuitePrismicSearch" />
+        </route>
+    </router>
+</config>

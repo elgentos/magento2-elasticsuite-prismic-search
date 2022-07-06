@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <elgentos_elasticsuite_prismic>
+            <prismic_settings>
+                <max_result>5</max_result>
+                <block_blacklist>before.body.end
+logo
+header-content
+footer
+top.search
+recaptcha_validation_customer_login
+div.sidebar.additional
+columns.top</block_blacklist>
+            </prismic_settings>
+        </elgentos_elasticsuite_prismic>
+    </default>
+</config>

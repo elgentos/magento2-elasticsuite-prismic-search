@@ -1,0 +1,33 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="elgentos_elasticsuite_prismic" translate="label" type="text" sortOrder="150" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Prismic settings</label>
+            <tab>smile_elasticsuite</tab>
+            <resource>Magento_Backend::smile_elasticsuite_prismic</resource>
+
+            <group id="prismic_settings" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Prismic settings</label>
+                <field id="content_types" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" translate="label" type="select">
+                    <label>Include Content types in ElasticSuite search</label>
+                    <frontend_model>Elgentos\ElasticsuitePrismicSearch\Block\Adminhtml\Form\Field\ContentTypes</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="block_blacklist" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" translate="label" type="textarea">
+                    <label>Block blacklist</label>
+                    <comment>Add blocks to this blacklist to stop them from being indexed</comment>
+                </field>
+                <field id="max_result" sortOrder="20" translate="label" type="text" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Max result</label>
+                    <validate>integer</validate>
+                    <comment><![CDATA[Maximum number of results to display in result block.]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

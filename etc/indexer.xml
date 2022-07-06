@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Indexer/etc/indexer.xsd">
+    <indexer id="elasticsuite_prismic_fulltext" view_id="elasticsuite_prismic_fulltext" class="Elgentos\ElasticsuitePrismicSearch\Model\Prismic\Indexer\Fulltext">
+        <title translate="true">Elasticsuite Prismic Indexing</title>
+        <description translate="true">Reindex Elasticsuite Prismic documents.</description>
+    </indexer>
+</config>

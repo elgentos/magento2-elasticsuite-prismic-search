@@ -1,0 +1,9 @@
+<div class="search results">
+    <h2><?php echo __('Results in cms pages.')?></h2>
+
+    <ul>
+        <?php foreach ($block->getPageCollection() as $currentPage) : ?>
+            <li><a href="<?php echo $block->getPageUrl($currentPage->getId())?>"><?php echo $currentPage->getTitle(); ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+</div>
