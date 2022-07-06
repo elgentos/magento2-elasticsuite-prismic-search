@@ -79,20 +79,64 @@ class PrismicDocuments
     public function getItems(int $storeId, array $ids = []): array
     {
         $this->documents = [];
-        $foundDocuments = [];
 
         $store = $this->storeManager->getStore($storeId);
 
         $prismicContentTypes = $this->getPrismicContentTypes($store);
         $api = $this->apiFactory->create();
 
-        foreach ($prismicContentTypes as $prismicContentType) {
-            $page = 0;
+        foreach ($prismicContentTypes ?? [] as $prismicContentType) {
+            $foundDocuments = [];
+            $languageSpecificDocuments = [];
 
+            // If the store has a content language fallback,
+            // fetch those documents first
+            if ($this->configuration->hasContentLanguageFallback($store)) {
+                $page = 0;
+                do {
+                    $predicates = [
+                        Predicates::at('document.type', $prismicContentType)
+                    ];
+                    if (!empty($ids)) {
+                        $predicates[] = Predicates::in('document.id', $ids);
+                    }
+                    $localeDocuments = $api->query(
+                        $predicates,
+                        [
+                            'lang' => $this->configuration->getContentLanguageFallback($store),
+                            'pageSize' => 20,
+                            'page' => $page
+                        ]
+                    );
+
+                    $page++;
+
+                    foreach ($localeDocuments->results as $doc) {
+                        $languageSpecificDocumentFound = false;
+                        foreach ($doc->alternate_languages ?? [] as $alternateLanguage) {
+                            if ($alternateLanguage->lang === $this->configuration->getContentLanguage($store)) {
+                                $languageSpecificDocuments[] = $alternateLanguage->id;
+                                $languageSpecificDocumentFound = true;
+                            }
+                        }
+
+                        // If the language-specific document is not found, add
+                        // this fallback language document to the
+                        // found documents array
+                        if (!$languageSpecificDocumentFound && !isset($foundDocuments[$doc->id])) {
+                            $foundDocuments[$doc->id] = $doc;
+                        }
+                    }
+                } while (!empty($localeDocuments->results));
+            }
+
+            // Now fetch all documents for the specific language
+            $page = 0;
             do {
                 $predicates = [
                     Predicates::at('document.type', $prismicContentType)
                 ];
+                $ids = array_unique(array_merge($ids, $languageSpecificDocuments));
                 if (!empty($ids)) {
                     $predicates[] = Predicates::in('document.id', $ids);
                 }
@@ -108,7 +152,9 @@ class PrismicDocuments
                 $page++;
 
                 foreach ($localeDocuments->results as $doc) {
-                    $foundDocuments[$doc->id] = $doc;
+                    if (!isset($foundDocuments[$doc->id])) {
+                        $foundDocuments[$doc->id] = $doc;
+                    }
                 }
             } while (!empty($localeDocuments->results));
 
@@ -116,7 +162,6 @@ class PrismicDocuments
 
             $this->addDocumentsToArray($foundDocuments, $store);
         }
-
 
         return $this->documents;
     }
