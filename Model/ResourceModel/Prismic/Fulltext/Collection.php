@@ -15,13 +15,13 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Search\Model\SearchEngine;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
-use Smile\ElasticsuiteCore\Search\Adapter\Elasticsuite\Response\QueryResponse;
+use Magento\Framework\Search\ResponseInterface;
 use Smile\ElasticsuiteCore\Search\Request\Builder;
 use Smile\ElasticsuiteCore\Search\RequestInterface;
 
 class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
 {
-    private QueryResponse $queryResponse;
+    private ResponseInterface $queryResponse;
 
     private Builder $requestBuilder;
 
@@ -135,7 +135,7 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
      * {@inheritdoc}
      */
     // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-    protected function _renderFiltersBefore()
+    protected function _renderFiltersBefore(): void
     {
         $searchRequest = $this->prepareRequest();
 
@@ -145,11 +145,12 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
 
         $documents = array_map(
             function (Document $doc) {
+                /** @phpstan-ignore-next-line */
                 return $doc->getSource();
             },
+            /** @phpstan-ignore-next-line */
             $this->queryResponse->getIterator()->getArrayCopy()
         );
-        return $documents;
     }
 
     /**
@@ -167,7 +168,7 @@ class Collection extends \Magento\Cms\Model\ResourceModel\Page\Collection
         foreach ($this->queryResponse->getIterator() as $document) {
             $documentId = $document->getId();
             $document = new DataObject($document->getSource());
-            $document->setStoreId($this->storeId);
+            $document->setData('store_id', $this->storeId);
             $this->_items[$documentId] = $document;
         }
 

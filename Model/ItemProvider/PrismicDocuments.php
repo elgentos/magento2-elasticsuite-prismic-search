@@ -20,6 +20,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Prismic\Dom\Link as PrismicLink;
 use Prismic\Predicates;
@@ -85,7 +86,7 @@ class PrismicDocuments
         $prismicContentTypes = $this->getPrismicContentTypes($store);
         $api = $this->apiFactory->create();
 
-        foreach ($prismicContentTypes ?? [] as $prismicContentType) {
+        foreach ($prismicContentTypes as $prismicContentType) {
             $foundDocuments = [];
             $languageSpecificDocuments = [];
 
@@ -210,7 +211,7 @@ class PrismicDocuments
         }
     }
 
-    public function getUrl(?string $url, StoreInterface $store): string
+    public function getUrl(?string $url, Store $store): string
     {
         return str_replace($store->getBaseUrl(), '', $url);
     }

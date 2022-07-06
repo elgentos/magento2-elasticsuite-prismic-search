@@ -8,7 +8,7 @@ use Magento\Cms\Helper\Page;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context as TemplateContext;
-use Magento\Search\Model\Query;
+use Magento\Search\Model\QueryInterface;
 use Magento\Search\Model\QueryFactory;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\Collection as PrismicCollection;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\CollectionFactory
@@ -76,7 +76,7 @@ class Suggest extends Template
         return (int) $this->getPrismicCollection()->getSize();
     }
 
-    public function getQuery(): Query
+    public function getQuery(): QueryInterface
     {
         return $this->queryFactory->get();
     }

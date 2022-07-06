@@ -22,16 +22,6 @@ class ContentTypeColumn extends Select
         $this->routeCollection = $routeCollectionFactory->create();
     }
 
-    public function setInputName(string $value): ContentTypeColumn
-    {
-        return $this->setName($value);
-    }
-
-    public function setInputId(string $value): ContentTypeColumn
-    {
-        return $this->setId($value);
-    }
-
     /**
      * Render block HTML
      *

@@ -8,11 +8,13 @@ use Magento\Cms\Helper\Page;
 use Magento\Framework\Phrase;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context as TemplateContext;
-use Magento\Search\Model\Query;
+use Magento\Search\Model\QueryInterface;
 use Magento\Search\Model\QueryFactory;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\CollectionFactory
     as PrismicCollectionFactory;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\Collection as PrismicCollection;
+use Magento\Store\Model\Store;
+use Magento\Theme\Block\Html\Breadcrumbs;
 
 class Result extends Template
 {
@@ -44,13 +46,16 @@ class Result extends Template
 
         // add Home breadcrumb
         $breadcrumbs = $this->getLayout()->getBlock('breadcrumbs');
-        if ($breadcrumbs) {
+        /** @var Breadcrumbs $breadcrumbs */
+        if ($breadcrumbs) { /** @phpstan-ignore-line */
+            /** @var Store $store */
+            $store = $this->_storeManager->getStore();
             $breadcrumbs->addCrumb(
                 'home',
                 [
                     'label' => __('Home'),
                     'title' => __('Go to Home Page'),
-                    'link' => $this->_storeManager->getStore()->getBaseUrl()
+                    'link' => $store->getBaseUrl()
                 ]
             )->addCrumb(
                 'search',
@@ -81,7 +86,7 @@ class Result extends Template
         return (int) $this->getPrismicCollection()->getSize();
     }
 
-    public function getQuery(): Query
+    public function getQuery(): QueryInterface
     {
         return $this->queryFactory->get();
     }

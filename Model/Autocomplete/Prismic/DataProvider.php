@@ -10,6 +10,7 @@ use Magento\Search\Model\Autocomplete\DataProviderInterface;
 use Magento\Search\Model\Autocomplete\Item;
 use Magento\Search\Model\QueryFactory;
 use Magento\Search\Model\Autocomplete\ItemFactory;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Elgentos\ElasticsuitePrismicSearch\Helper\Configuration as ConfigurationHelper;
 use Elgentos\ElasticsuitePrismicSearch\Model\ResourceModel\Prismic\Fulltext\CollectionFactory as PrismicCollectionFactory;
@@ -66,10 +67,12 @@ class DataProvider implements DataProviderInterface
         $result = [];
 
         foreach ($this->getPrismicCollection() as $document) {
-            $item = $this->itemFactory->create(
+            /** @var Store $store */
+            $store = $this->storeManager->getStore();
+            $item  = $this->itemFactory->create(
                 [
                     'title' => $document->getTitle(),
-                    'url'   => $this->storeManager->getStore()->getBaseUrl(). $document->getIdentifier(),
+                    'url'   => $store->getBaseUrl(). $document->getIdentifier(),
                     'type'  => $this->getType(),
                 ]
             );
@@ -83,18 +86,6 @@ class DataProvider implements DataProviderInterface
         }
 
         return $result;
-    }
-
-    private function getSuggestedTerms(): array
-    {
-        $terms = array_map(
-            function (Item $termItem) {
-                return $termItem->getTitle();
-            },
-            $this->termDataProvider->getItems()
-        );
-
-        return $terms;
     }
 
     private function getPrismicCollection(): Collection

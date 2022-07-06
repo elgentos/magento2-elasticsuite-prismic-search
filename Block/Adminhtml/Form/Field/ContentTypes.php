@@ -27,7 +27,7 @@ class ContentTypes extends AbstractFieldArray
             'renderer' => $this->getContentTypeRenderer()
         ]);
         $this->_addAfter = false;
-        $this->_addButtonLabel = __('Add Content Type');
+        $this->_addButtonLabel = __('Add Content Type')->getText();
     }
 
     /**
@@ -41,7 +41,7 @@ class ContentTypes extends AbstractFieldArray
     {
         $options = [];
 
-        $contentType = $row->getContentType();
+        $contentType = $row->getData('content_type');
         if ($contentType !== null) {
             $options['option_' . $this->getContentTypeRenderer()->calcOptionHash($contentType)] = 'selected="selected"';
         }
