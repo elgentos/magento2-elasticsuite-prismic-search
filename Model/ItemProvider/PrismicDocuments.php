@@ -108,7 +108,7 @@ class PrismicDocuments
                 $page++;
 
                 foreach ($localeDocuments->results as $doc) {
-                    $foundDocuments[] = $doc;
+                    $foundDocuments[$doc->id] = $doc;
                 }
             } while (!empty($localeDocuments->results));
 
