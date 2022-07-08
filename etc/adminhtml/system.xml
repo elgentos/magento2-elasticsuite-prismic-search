@@ -20,7 +20,7 @@
                 </field>
                 <field id="block_blacklist" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" translate="label" type="textarea">
                     <label>Block blacklist</label>
-                    <comment>Add blocks to this blacklist to stop them from being indexed</comment>
+                    <comment>Add Prismic blocks (contained in the prismicio_content container) to this blacklist to stop that content from being indexed</comment>
                 </field>
                 <field id="max_result" sortOrder="20" translate="label" type="text" showInDefault="1" showInWebsite="1"
                        showInStore="1">

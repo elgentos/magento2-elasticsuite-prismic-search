@@ -4,14 +4,7 @@
         <elgentos_elasticsuite_prismic>
             <prismic_settings>
                 <max_result>5</max_result>
-                <block_blacklist>before.body.end
-logo
-header-content
-footer
-top.search
-recaptcha_validation_customer_login
-div.sidebar.additional
-columns.top</block_blacklist>
+                <block_blacklist></block_blacklist>
             </prismic_settings>
         </elgentos_elasticsuite_prismic>
     </default>

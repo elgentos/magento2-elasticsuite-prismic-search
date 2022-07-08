@@ -18,6 +18,7 @@ use Magento\Framework\App\ResponseFactory;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\View\Layout;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
@@ -231,6 +232,7 @@ class PrismicDocuments
             $page            = $prismicPage->createPage($document, ['isIsolated' => true]);
 
             // Remove blocks from layout
+            /** @var Layout $layout */
             $layout          = $page->getLayout();
             array_map(static function ($blockName) use ($layout) {
                     $layout->unsetElement($blockName);
@@ -243,12 +245,7 @@ class PrismicDocuments
                     )
                 )
             ));
-
-            // Generate response HTML
-            /** @var Http $response */
-            $response = $this->responseFactory->create();
-            $page->renderResult($response);
-            $content = $response->getContent();
+            $content = $layout->renderElement('prismicio_content');
             $this->emulation->stopEnvironmentEmulation();
 
             // Extract text from HTML
