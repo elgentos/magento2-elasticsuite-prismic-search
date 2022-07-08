@@ -12,7 +12,6 @@ use Elgentos\PrismicIO\Model\ResourceModel\Route\Collection as RouteCollection;
 use Elgentos\PrismicIO\Renderer\PageFactory;
 use Elgentos\PrismicIO\ViewModel\LinkResolver;
 use Elgentos\PrismicIO\Model\ResourceModel\Route\CollectionFactory as RouteCollectionFactory;
-use Exception;
 use Html2Text\Html2Text;
 use Magento\Email\Model\TemplateFactory;
 use Magento\Framework\App\Response\Http;
@@ -25,15 +24,18 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
+use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory;
+use Magento\UrlRewrite\Model\UrlRewrite;
 use Prismic\Dom\Link as PrismicLink;
 use Prismic\Predicates;
 use Psr\Log\LoggerInterface;
-use stdClass;
 
 class PrismicDocuments
 {
-    private Configuration $extensionConfiguration;
+    const CHUNK_SIZE = 20;
 
+    private Configuration $extensionConfiguration;
     private Json $json;
     private ConfigurationInterface $configuration;
     private StoreManagerInterface $storeManager;
@@ -46,26 +48,27 @@ class PrismicDocuments
     private State $appState;
     private ResponseFactory $responseFactory;
     private RouteCollection $routeCollection;
+    private UrlRewriteCollection $urlRewriteCollection;
 
     public function __construct(
-        Api                     $apiFactory,
-        ConfigurationInterface  $configuration,
-        StoreManagerInterface   $storeManager,
-        LinkResolver            $linkResolver,
-        Configuration           $extensionConfiguration,
-        Json                    $json,
-        LoggerInterface         $logger,
-        PageFactory             $prismicPageFactory,
-        Emulation               $emulation,
-        ResponseFactory         $responseFactory,
-        State                   $appState,
-        RouteCollectionFactory  $routeCollectionFactory
+        Api                         $apiFactory,
+        ConfigurationInterface      $configuration,
+        StoreManagerInterface       $storeManager,
+        LinkResolver                $linkResolver,
+        Configuration               $extensionConfiguration,
+        Json                        $json,
+        LoggerInterface             $logger,
+        PageFactory                 $prismicPageFactory,
+        Emulation                   $emulation,
+        ResponseFactory             $responseFactory,
+        State                       $appState,
+        RouteCollectionFactory      $routeCollectionFactory,
+        UrlRewriteCollectionFactory $urlRewriteCollectionFactory
     ) {
         $this->extensionConfiguration = $extensionConfiguration;
         $this->json = $json;
         $this->configuration = $configuration;
         $this->storeManager = $storeManager;
-        $this->apiFactory = $apiFactory;
         $this->logger = $logger;
         $this->linkResolver = $linkResolver;
         $this->prismicPageFactory = $prismicPageFactory;
@@ -73,6 +76,8 @@ class PrismicDocuments
         $this->appState = $appState;
         $this->responseFactory = $responseFactory;
         $this->routeCollection = $routeCollectionFactory->create();
+        $this->api = $apiFactory->create();
+        $this->urlRewriteCollection = $urlRewriteCollectionFactory->create();
     }
 
     /**
@@ -90,85 +95,19 @@ class PrismicDocuments
         $store = $this->storeManager->getStore($storeId);
 
         $prismicContentTypes = $this->getPrismicContentTypes($store);
-        $api = $this->apiFactory->create();
+
+        $this->foundDocuments = [];
+
+        $this->fetchUrlRewriteDocuments($store, $ids);
 
         foreach ($prismicContentTypes as $prismicContentType) {
-            $foundDocuments = [];
-            $languageSpecificDocuments = [];
-
-            // If the store has a content language fallback,
-            // fetch those documents first
-            if ($this->configuration->hasContentLanguageFallback($store)) {
-                $page = 0;
-                do {
-                    $predicates = [
-                        Predicates::at('document.type', $prismicContentType)
-                    ];
-                    if (!empty($ids)) {
-                        $predicates[] = Predicates::in('document.id', $ids);
-                    }
-                    $localeDocuments = $api->query(
-                        $predicates,
-                        [
-                            'lang' => $this->configuration->getContentLanguageFallback($store),
-                            'pageSize' => 20,
-                            'page' => $page
-                        ]
-                    );
-
-                    $page++;
-
-                    foreach ($localeDocuments->results as $doc) {
-                        $languageSpecificDocumentFound = false;
-                        foreach ($doc->alternate_languages ?? [] as $alternateLanguage) {
-                            if ($alternateLanguage->lang === $this->configuration->getContentLanguage($store)) {
-                                $languageSpecificDocuments[] = $alternateLanguage->id;
-                                $languageSpecificDocumentFound = true;
-                            }
-                        }
-
-                        // If the language-specific document is not found, add
-                        // this fallback language document to the
-                        // found documents array
-                        if (!$languageSpecificDocumentFound && !isset($foundDocuments[$doc->id])) {
-                            $foundDocuments[$doc->id] = $doc;
-                        }
-                    }
-                } while (!empty($localeDocuments->results));
-            }
-
-            // Now fetch all documents for the specific language
-            $page = 0;
-            do {
-                $predicates = [
-                    Predicates::at('document.type', $prismicContentType)
-                ];
-                $ids = array_unique(array_merge($ids, $languageSpecificDocuments));
-                if (!empty($ids)) {
-                    $predicates[] = Predicates::in('document.id', $ids);
-                }
-                $localeDocuments = $api->query(
-                    $predicates,
-                    [
-                        'lang' => $this->configuration->getContentLanguage($store),
-                        'pageSize' => 20,
-                        'page' => $page
-                    ]
-                );
-
-                $page++;
-
-                foreach ($localeDocuments->results as $doc) {
-                    if (!isset($foundDocuments[$doc->id])) {
-                        $foundDocuments[$doc->id] = $doc;
-                    }
-                }
-            } while (!empty($localeDocuments->results));
-
-            $this->logger->info($store->getCode() . ': ' . count($foundDocuments));
-
-            $this->addDocumentsToArray($foundDocuments, $store);
+            $this->languageSpecificDocuments = [];
+            $this->fetchFallbackLanguageDocuments($store, $prismicContentType, $ids);
+            $this->fetchSpecificLanguageDocuments($store, $prismicContentType, $ids);
+            $this->logger->info($store->getCode() . ': ' . count($this->foundDocuments));
         }
+
+        $this->addDocumentsToArray($this->foundDocuments, $store);
 
         return $this->documents;
     }
@@ -225,9 +164,9 @@ class PrismicDocuments
 
     /**
      * @throws NoSuchEntityException
-     * @throws ApiNotEnabledException|Exception
+     * @throws ApiNotEnabledException|\Exception
      */
-    private function getIndexableTextFromDocument(stdClass $document, StoreInterface $store): string
+    private function getIndexableTextFromDocument(\stdClass $document, StoreInterface $store): string
     {
         return $this->appState->emulateAreaCode('frontend', function () use ($document, $store) {
             $this->emulation->startEnvironmentEmulation($store->getId());
@@ -258,5 +197,122 @@ class PrismicDocuments
             $html = new Html2Text($content);
             return $html->getText();
         });
+    }
+
+    private function fetchFallbackLanguageDocuments(
+        StoreInterface $store,
+        string $prismicContentType,
+        array $ids
+    ): void {
+        if ($this->configuration->hasContentLanguageFallback($store)) {
+            $page = 0;
+            do {
+                $predicates = [
+                    Predicates::at('document.type', $prismicContentType)
+                ];
+                if (!empty($ids)) {
+                    $predicates[] = Predicates::in(sprintf('my.%s.id', $prismicContentType), $ids);
+                }
+                $localeDocuments = $this->api->query(
+                    $predicates,
+                    [
+                        'lang' => $this->configuration->getContentLanguageFallback($store),
+                        'pageSize' => self::CHUNK_SIZE,
+                        'page' => $page
+                    ]
+                );
+
+                $page++;
+
+                foreach ($localeDocuments->results as $doc) {
+                    $languageSpecificDocumentFound = false;
+                    foreach ($doc->alternate_languages ?? [] as $alternateLanguage) {
+                        if ($alternateLanguage->lang === $this->configuration->getContentLanguage($store)) {
+                            $this->languageSpecificDocuments[] = $alternateLanguage->id;
+                            $languageSpecificDocumentFound     = true;
+                        }
+                    }
+
+                    // If the language-specific document is not found, add
+                    // this fallback language document to the
+                    // found documents array
+                    if (!$languageSpecificDocumentFound && !isset($this->foundDocuments[$doc->id])) {
+                        $this->foundDocuments[$doc->id] = $doc;
+                    }
+                }
+            } while (!empty($localeDocuments->results));
+        }
+    }
+
+    private function fetchSpecificLanguageDocuments(
+        StoreInterface $store,
+        string $prismicContentType,
+        array $ids
+    ): void {
+        $page = 0;
+        do {
+            $predicates = [
+                Predicates::at('document.type', $prismicContentType)
+            ];
+            $ids = array_unique(array_merge($ids, $this->languageSpecificDocuments));
+            if (!empty($ids)) {
+                $predicates[] = Predicates::in(sprintf('my.%s.id', $prismicContentType), $ids);
+            }
+            $localeDocuments = $this->api->query(
+                $predicates,
+                [
+                    'lang' => $this->configuration->getContentLanguage($store),
+                    'pageSize' => self::CHUNK_SIZE,
+                    'page' => $page
+                ]
+            );
+
+            $page++;
+
+            foreach ($localeDocuments->results as $doc) {
+                if (!isset($this->foundDocuments[$doc->id])) {
+                    $this->foundDocuments[$doc->id] = $doc;
+                }
+            }
+        } while (!empty($localeDocuments->results));
+    }
+
+    private function fetchUrlRewriteDocuments(
+        StoreInterface $store,
+        array $ids
+    ): void {
+        $urlRewrites = $this->urlRewriteCollection
+            ->addFieldToFilter('target_path', ['like' => 'prismicio/direct/page/%'])
+            ->addFieldToFilter('store_id', $store->getId())
+            ->addFieldToSelect(['store_id', 'request_path', 'target_path']);
+
+        $urlRewriteDocuments = array_Reduce($urlRewrites->getItems(), function ($carry, $urlRewrite) {
+            [,,,,$contentType,,$uid] = explode('/', $urlRewrite->getTargetPath());
+            if (!isset($carry[$contentType])) $carry[$contentType] = [];
+            $carry[$contentType][] = $uid;
+            return $carry;
+        }, []);
+
+        foreach ($urlRewriteDocuments as $prismicContentType => $uids) {
+            foreach(array_chunk($uids, self::CHUNK_SIZE) as $uidsChunk) {
+                $localeDocuments = $this->api->query(
+                    [
+                        Predicates::at('document.type', $prismicContentType),
+                        Predicates::in(sprintf('my.%s.uid', $prismicContentType), $uidsChunk)
+                    ],
+                    [
+                        'lang' => $this->configuration->getContentLanguage($store),
+                        'pageSize' => self::CHUNK_SIZE,
+                        'page' => 0
+                    ]
+                );
+
+                foreach ($localeDocuments->results as $doc) {
+                    if (!isset($this->foundDocuments[$doc->id])) {
+                        $this->foundDocuments[$doc->id] = $doc;
+                    }
+                }
+            }
+        }
     }
 }
