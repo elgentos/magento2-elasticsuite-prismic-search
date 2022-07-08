@@ -8,8 +8,10 @@ use Elgentos\ElasticsuitePrismicSearch\Helper\Configuration;
 use Elgentos\PrismicIO\Api\ConfigurationInterface;
 use Elgentos\PrismicIO\Exception\ApiNotEnabledException;
 use Elgentos\PrismicIO\Model\Api;
+use Elgentos\PrismicIO\Model\ResourceModel\Route\Collection as RouteCollection;
 use Elgentos\PrismicIO\Renderer\PageFactory;
 use Elgentos\PrismicIO\ViewModel\LinkResolver;
+use Elgentos\PrismicIO\Model\ResourceModel\Route\CollectionFactory as RouteCollectionFactory;
 use Exception;
 use Html2Text\Html2Text;
 use Magento\Email\Model\TemplateFactory;
@@ -43,6 +45,7 @@ class PrismicDocuments
     private Emulation $emulation;
     private State $appState;
     private ResponseFactory $responseFactory;
+    private RouteCollection $routeCollection;
 
     public function __construct(
         Api                     $apiFactory,
@@ -55,7 +58,8 @@ class PrismicDocuments
         PageFactory             $prismicPageFactory,
         Emulation               $emulation,
         ResponseFactory         $responseFactory,
-        State                   $appState
+        State                   $appState,
+        RouteCollectionFactory  $routeCollectionFactory
     ) {
         $this->extensionConfiguration = $extensionConfiguration;
         $this->json = $json;
@@ -68,6 +72,7 @@ class PrismicDocuments
         $this->emulation = $emulation;
         $this->appState = $appState;
         $this->responseFactory = $responseFactory;
+        $this->routeCollection = $routeCollectionFactory->create();
     }
 
     /**
@@ -170,8 +175,7 @@ class PrismicDocuments
 
     protected function getPrismicContentTypes(StoreInterface $store): array
     {
-        $prismicContentTypes = $this->json->unserialize($this->extensionConfiguration->getConfigValue('content_types'));
-        return array_filter(array_column($prismicContentTypes, 'content_type'));
+        return $this->routeCollection->getColumnValues('content_type');
     }
 
     protected function addDocumentsToArray(array $documents, StoreInterface $store): void
@@ -197,18 +201,20 @@ class PrismicDocuments
 
             $content = $this->getIndexableTextFromDocument($document, $store);
 
-            $this->documents[] = [
-                'id' => $document->id,
-                'store_id' => $store->getId(),
-                'url' => $url,
-                'type' => $document->type,
-                'title' => $title[0]->text ?? '',
-                'content' => $content
-            ];
+            if ($content) {
+                $this->documents[] = [
+                    'id' => $document->id,
+                    'store_id' => $store->getId(),
+                    'url' => $url,
+                    'type' => $document->type,
+                    'title' => $title[0]->text ?? '',
+                    'content' => $content
+                ];
 
-            $this->logger->info(
-                $store->getCode() . ' - ' . $document->type . ': ' . $document->id . ' (' . $title[0]->text . ')'
-            );
+                $this->logger->info(
+                    $store->getCode() . ' - ' . $document->type . ': ' . $document->id . ' (' . $title[0]->text . ')'
+                );
+            }
         }
     }
 
