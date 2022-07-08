@@ -31,7 +31,7 @@ class Suggest extends Template
     public function __construct(
         TemplateContext          $context,
         QueryFactory             $queryFactory,
-        PrismicCollectionFactory $prismicCollectionFactory,
+        PrismicCollectionFactory $prismicCollectionFactory, /** @phpstan-ignore-line */
         Configuration            $helper,
         Page                     $cmsPage,
         UrlInterface             $urlBuilder,
@@ -96,9 +96,10 @@ class Suggest extends Template
         return $this->urlBuilder->getUrl($url);
     }
 
+    /** @phpstan-ignore-next-line */
     private function initPrismicCollection(PrismicCollectionFactory $collectionFactory): PrismicCollection
     {
-        $prismicCollection = $collectionFactory->create();
+        $prismicCollection = $collectionFactory->create(); /** @phpstan-ignore-line */
 
         $prismicCollection->setPageSize($this->getNumberOfResults());
         $prismicCollection->addStoreFilter((int)$this->_storeManager->getStore()->getId());

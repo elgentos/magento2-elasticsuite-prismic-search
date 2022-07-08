@@ -7,18 +7,15 @@ namespace Elgentos\ElasticsuitePrismicSearch\Model\ItemProvider;
 use Elgentos\ElasticsuitePrismicSearch\Helper\Configuration;
 use Elgentos\PrismicIO\Api\ConfigurationInterface;
 use Elgentos\PrismicIO\Exception\ApiNotEnabledException;
-use Elgentos\PrismicIO\Model\Api;
+use Elgentos\PrismicIO\Model\Api as ApiFactory;
 use Elgentos\PrismicIO\Model\ResourceModel\Route\Collection as RouteCollection;
 use Elgentos\PrismicIO\Renderer\PageFactory;
 use Elgentos\PrismicIO\ViewModel\LinkResolver;
 use Elgentos\PrismicIO\Model\ResourceModel\Route\CollectionFactory as RouteCollectionFactory;
 use Html2Text\Html2Text;
 use Magento\Email\Model\TemplateFactory;
-use Magento\Framework\App\Response\Http;
-use Magento\Framework\App\ResponseFactory;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Layout;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\App\Emulation;
@@ -27,6 +24,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory;
 use Magento\UrlRewrite\Model\UrlRewrite;
+use Prismic\Api as PrismicApi;
 use Prismic\Dom\Link as PrismicLink;
 use Prismic\Predicates;
 use Psr\Log\LoggerInterface;
@@ -35,38 +33,35 @@ class PrismicDocuments
 {
     const CHUNK_SIZE = 20;
 
+    private PrismicApi $api;
     private Configuration $extensionConfiguration;
-    private Json $json;
     private ConfigurationInterface $configuration;
     private StoreManagerInterface $storeManager;
-    private Api $apiFactory;
     private array $documents;
+    private array $foundDocuments;
+    private array $languageSpecificDocuments;
     private LoggerInterface $logger;
     private LinkResolver $linkResolver;
     private PageFactory $prismicPageFactory;
     private Emulation $emulation;
     private State $appState;
-    private ResponseFactory $responseFactory;
     private RouteCollection $routeCollection;
     private UrlRewriteCollection $urlRewriteCollection;
 
     public function __construct(
-        Api                         $apiFactory,
+        ApiFactory                  $apiFactory,
         ConfigurationInterface      $configuration,
         StoreManagerInterface       $storeManager,
         LinkResolver                $linkResolver,
         Configuration               $extensionConfiguration,
-        Json                        $json,
         LoggerInterface             $logger,
         PageFactory                 $prismicPageFactory,
         Emulation                   $emulation,
-        ResponseFactory             $responseFactory,
         State                       $appState,
         RouteCollectionFactory      $routeCollectionFactory,
         UrlRewriteCollectionFactory $urlRewriteCollectionFactory
     ) {
         $this->extensionConfiguration = $extensionConfiguration;
-        $this->json = $json;
         $this->configuration = $configuration;
         $this->storeManager = $storeManager;
         $this->logger = $logger;
@@ -74,7 +69,6 @@ class PrismicDocuments
         $this->prismicPageFactory = $prismicPageFactory;
         $this->emulation = $emulation;
         $this->appState = $appState;
-        $this->responseFactory = $responseFactory;
         $this->routeCollection = $routeCollectionFactory->create();
         $this->api = $apiFactory->create();
         $this->urlRewriteCollection = $urlRewriteCollectionFactory->create();
@@ -287,7 +281,7 @@ class PrismicDocuments
             ->addFieldToSelect(['store_id', 'request_path', 'target_path']);
 
         $urlRewriteDocuments = array_Reduce($urlRewrites->getItems(), function ($carry, $urlRewrite) {
-            [,,,,$contentType,,$uid] = explode('/', $urlRewrite->getTargetPath());
+            [,,,,$contentType,,$uid] = explode('/', $urlRewrite->getData('target_path'));
             if (!isset($carry[$contentType])) $carry[$contentType] = [];
             $carry[$contentType][] = $uid;
             return $carry;

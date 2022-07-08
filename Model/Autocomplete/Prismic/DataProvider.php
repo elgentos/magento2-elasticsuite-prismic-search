@@ -27,7 +27,7 @@ class DataProvider implements DataProviderInterface
 
     protected TermDataProvider $termDataProvider;
 
-    protected PrismicCollectionFactory $prismicCollectionFactory;
+    protected PrismicCollectionFactory $prismicCollectionFactory; /** @phpstan-ignore-line */
 
     protected ConfigurationHelper $configurationHelper;
 
@@ -41,7 +41,7 @@ class DataProvider implements DataProviderInterface
         ItemFactory $itemFactory,
         QueryFactory $queryFactory,
         TermDataProvider $termDataProvider,
-        PrismicCollectionFactory $prismicCollectionFactory,
+        PrismicCollectionFactory $prismicCollectionFactory, /** @phpstan-ignore-line */
         ConfigurationHelper $configurationHelper,
         StoreManagerInterface $storeManager,
         EventManager $eventManager,
@@ -90,7 +90,7 @@ class DataProvider implements DataProviderInterface
 
     private function getPrismicCollection(): Collection
     {
-        $prismicCollection = $this->prismicCollectionFactory->create();
+        $prismicCollection = $this->prismicCollectionFactory->create(); /** @phpstan-ignore-line */
 
         $prismicCollection->setPageSize($this->getResultsPageSize());
 

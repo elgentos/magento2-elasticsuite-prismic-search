@@ -27,7 +27,7 @@ class Result extends Template
     public function __construct(
         TemplateContext $context,
         QueryFactory $queryFactory,
-        PrismicCollectionFactory $prismicCollectionFactory,
+        PrismicCollectionFactory $prismicCollectionFactory, /** @phpstan-ignore-line */
         Page $cmsPage,
         array $data = []
     ) {
@@ -113,9 +113,10 @@ class Result extends Template
         return __("Search results for: '%1'", $this->escapeHtml($this->getQueryText()));
     }
 
+    /** @phpstan-ignore-next-line */
     private function initPrismicCollection(PrismicCollectionFactory $collectionFactory): PrismicCollection
     {
-        $prismicCollection = $collectionFactory->create();
+        $prismicCollection = $collectionFactory->create(); /** @phpstan-ignore-line */
 
         $queryText = $this->getQueryText();
         $prismicCollection->addStoreFilter((int)$this->_storeManager->getStore()->getId());
