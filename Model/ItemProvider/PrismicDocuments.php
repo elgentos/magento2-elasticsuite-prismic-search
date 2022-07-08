@@ -172,9 +172,10 @@ class PrismicDocuments
 
             // Remove blocks from layout
             /** @var Layout $layout */
-            $layout          = $page->getLayout();
+            $layout = $page->getLayout();
+
             array_map(static function ($blockName) use ($layout) {
-                    $layout->unsetElement($blockName);
+                $layout->unsetElement($blockName);
             }, array_filter(
                 array_map(
                     'trim',
@@ -280,7 +281,7 @@ class PrismicDocuments
             ->addFieldToFilter('store_id', $store->getId())
             ->addFieldToSelect(['store_id', 'request_path', 'target_path']);
 
-        $urlRewriteDocuments = array_Reduce($urlRewrites->getItems(), function ($carry, $urlRewrite) {
+        $urlRewriteDocuments = array_reduce($urlRewrites->getItems(), function ($carry, $urlRewrite) {
             [,,,,$contentType,,$uid] = explode('/', $urlRewrite->getData('target_path'));
             if (!isset($carry[$contentType])) $carry[$contentType] = [];
             $carry[$contentType][] = $uid;
