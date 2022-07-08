@@ -32,6 +32,7 @@ use Psr\Log\LoggerInterface;
 class PrismicDocuments
 {
     const CHUNK_SIZE = 20;
+    const BLOCK_BLACKLIST = 'block_blacklist';
 
     private PrismicApi $api;
     private Configuration $extensionConfiguration;
@@ -174,17 +175,25 @@ class PrismicDocuments
             /** @var Layout $layout */
             $layout = $page->getLayout();
 
-            array_map(static function ($blockName) use ($layout) {
-                $layout->unsetElement($blockName);
+            array_map(static function ($blockName) use ($layout, $document) {
+                if (stripos($blockName, '::') !== false) {
+                    [$prismicContentType, $blockName] = explode('::', $blockName);
+                    if ($prismicContentType === $document->type) {
+                        $layout->unsetElement($blockName);
+                    }
+                } else {
+                    $layout->unsetElement($blockName);
+                }
             }, array_filter(
                 array_map(
                     'trim',
                     explode(
                         PHP_EOL,
-                        $this->extensionConfiguration->getConfigValue('block_blacklist')
+                        $this->extensionConfiguration->getConfigValue(self::BLOCK_BLACKLIST)
                     )
                 )
             ));
+
             $content = $layout->renderElement('prismicio_content');
             $this->emulation->stopEnvironmentEmulation();
 
