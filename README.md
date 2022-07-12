@@ -4,11 +4,11 @@ This extension adds search (incl. autocomplete) support for Prismic custom types
 
 ## Configuration
 
-Under Stores > Configuration > ElasticSuite > Prismic Settings you can define which content types will be indexed. 
+Under Stores > Configuration > ElasticSuite > Prismic Settings you can set certain configuration.
 
-You can also configure certain blocks to be removed from the rendered result. By default we remove the header, footer, etc.
+You can also configure certain blocks to be removed from the rendered result. Use the `content-type::block-name` notation to target specific blocks inside specific content types. For example, if you have a slice called `banner` in the content type `landing_page`, you can enter `landing_page::banner` to exclude the text in that slice.
 
-![image](https://user-images.githubusercontent.com/431360/177497365-103b6ce5-e74a-4199-a641-3c7649d148b2.png)
+![image](https://user-images.githubusercontent.com/431360/178054241-cb28ff73-275f-4d38-9e16-60c224721301.png)
 
 ## Installation
 
