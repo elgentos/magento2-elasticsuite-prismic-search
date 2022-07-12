@@ -133,23 +133,21 @@ class PrismicDocuments
                     && stripos($item[0]->type, 'heading') !== false;
             }));
 
-            $content = $this->getIndexableTextFromDocument($document, $store);
+            $documentData = [
+                'id' => $document->id,
+                'store_id' => $store->getId(),
+                'url' => $url,
+                'type' => $document->type,
+                'title' => $title[0]->text ?? '',
+                'content' => $this->getIndexableTextFromDocument($document, $store)
+            ];
 
-            if ($content) {
-                $documentData = [
-                    'id' => $document->id,
-                    'store_id' => $store->getId(),
-                    'url' => $url,
-                    'type' => $document->type,
-                    'title' => $title[0]->text ?? '',
-                    'content' => $content
-                ];
+            $this->eventManager->dispatch(
+                'elgentos_elasticsuite_prismic_search_before_indexation',
+                ['document' => $document, 'documentData' => $documentData]
+            );
 
-                $this->eventManager->dispatch(
-                    'elgentos_elasticsuite_prismic_search_before_indexation',
-                    ['document' => $document, 'documentData' => $documentData]
-                );
-
+            if ($documentData['content']) {
                 $this->documents[] = $documentData;
 
                 $this->logger->info(
