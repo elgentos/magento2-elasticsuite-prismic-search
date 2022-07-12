@@ -136,7 +136,7 @@ class PrismicDocuments
             $content = $this->getIndexableTextFromDocument($document, $store);
 
             if ($content) {
-                $this->documents[] = [
+                $documentData = [
                     'id' => $document->id,
                     'store_id' => $store->getId(),
                     'url' => $url,
@@ -144,6 +144,13 @@ class PrismicDocuments
                     'title' => $title[0]->text ?? '',
                     'content' => $content
                 ];
+
+                $this->eventManager->dispatch(
+                    'elgentos_elasticsuite_prismic_search_before_indexation',
+                    ['document' => $document, 'documentData' => $documentData]
+                );
+
+                $this->documents[] = $documentData;
 
                 $this->logger->info(
                     $store->getCode() . ' - ' . $document->type . ': ' . $document->id . ' (' . $title[0]->text . ')'

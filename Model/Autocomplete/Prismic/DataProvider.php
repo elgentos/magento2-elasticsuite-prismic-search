@@ -78,7 +78,7 @@ class DataProvider implements DataProviderInterface
             );
 
             $this->eventManager->dispatch(
-                'smile_elasticsuite_prismic_search_autocomplete_page_item',
+                'elgentos_elasticsuite_prismic_search_autocomplete_page_item',
                 ['document' => $document, 'item' => $item]
             );
 
