@@ -24,6 +24,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory;
 use Magento\UrlRewrite\Model\UrlRewrite;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 use Prismic\Api as PrismicApi;
 use Prismic\Dom\Link as PrismicLink;
 use Prismic\Predicates;
@@ -48,6 +49,7 @@ class PrismicDocuments
     private State $appState;
     private RouteCollection $routeCollection;
     private UrlRewriteCollection $urlRewriteCollection;
+    private EventManager $eventManager;
 
     public function __construct(
         ApiFactory                  $apiFactory,
@@ -60,7 +62,8 @@ class PrismicDocuments
         Emulation                   $emulation,
         State                       $appState,
         RouteCollectionFactory      $routeCollectionFactory,
-        UrlRewriteCollectionFactory $urlRewriteCollectionFactory
+        UrlRewriteCollectionFactory $urlRewriteCollectionFactory,
+        EventManager                $eventManager
     ) {
         $this->extensionConfiguration = $extensionConfiguration;
         $this->configuration = $configuration;
@@ -73,6 +76,7 @@ class PrismicDocuments
         $this->routeCollection = $routeCollectionFactory->create();
         $this->api = $apiFactory->create();
         $this->urlRewriteCollection = $urlRewriteCollectionFactory->create();
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -220,7 +224,7 @@ class PrismicDocuments
                     Predicates::at('document.type', $prismicContentType)
                 ];
                 if (!empty($ids)) {
-                    $predicates[] = Predicates::in(sprintf('my.%s.id', $prismicContentType), $ids);
+                    $predicates[] = Predicates::in('document.id', $ids);
                 }
                 $localeDocuments = $this->api->query(
                     $predicates,
@@ -265,7 +269,7 @@ class PrismicDocuments
             ];
             $ids = array_unique(array_merge($ids, $this->languageSpecificDocuments));
             if (!empty($ids)) {
-                $predicates[] = Predicates::in(sprintf('my.%s.id', $prismicContentType), $ids);
+                $predicates[] = Predicates::in('document.id', $ids);
             }
             $localeDocuments = $this->api->query(
                 $predicates,
