@@ -6,7 +6,7 @@
     "require": {
         "magento/framework": "*",
         "smile/elasticsuite": "*",
-        "elgentos/module-prismicio": "*"
+        "elgentos/module-prismicio": ">=1.9.1"
     },
     "autoload": {
         "files": [
